@@ -61,8 +61,12 @@ const cartSlice = createSlice({
     setAllProducts: (state, action: PayloadAction<Product[]>) => {
       state.allProducts = action.payload;
     },
+
+    resetCart: (state) => {
+        state = initialState
+    }
   },
 });
 
-export const { addItem, removeItem, setAllProducts } = cartSlice.actions;
+export const { addItem, removeItem, setAllProducts, resetCart } = cartSlice.actions;
 export default cartSlice.reducer;

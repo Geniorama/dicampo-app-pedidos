@@ -1,5 +1,6 @@
-import CreateOrder from "../views/CreateOrder"
+import { CreateOrder } from "../views";
 import { createClient } from "contentful";
+import { withPageAuthRequired } from "@auth0/nextjs-auth0";
 
 const client = createClient({
   accessToken: process.env.CONTENTFUL_ACCESS_TOKEN as string,
@@ -17,7 +18,7 @@ const loadData = async () => {
 }
 
 
-export default async function CreateOrderPage() {
+async function CreateOrderPage() {
   const dataProducts = await loadData()
   return (
     <CreateOrder 
@@ -25,3 +26,5 @@ export default async function CreateOrderPage() {
     />
   )
 }
+
+export default withPageAuthRequired(CreateOrderPage);

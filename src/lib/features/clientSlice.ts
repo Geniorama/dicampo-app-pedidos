@@ -19,7 +19,7 @@ export const clientSlice = createSlice({
         setClients: (state, action:PayloadAction<Client[]>) => {
             state.clients = action.payload
         },
-        setSelectedClient: (state, action:PayloadAction<Client>) =>{
+        setSelectedClient: (state, action:PayloadAction<Client | null>) =>{
             state.selectedClient = action.payload
         }
     }

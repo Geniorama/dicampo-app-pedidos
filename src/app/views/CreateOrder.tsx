@@ -184,11 +184,8 @@ export default function CreateOrder({ products }: CreateOrderProps) {
         sellerEmail: sellerEmail
       };
 
-      console.log("Order to be sent:", order);
-
       try {
         const res = await createEntryOrder(order);
-
         console.log(res);
       } catch (error) {
         console.log(error);
@@ -200,6 +197,8 @@ export default function CreateOrder({ products }: CreateOrderProps) {
       };
 
       sendDataToWebHook(order, contact);
+
+      router.push('/thank-you')
     }
   };
 
@@ -243,7 +242,7 @@ export default function CreateOrder({ products }: CreateOrderProps) {
   };
 
   return (
-    <div>
+    <div className="p-4">
       {openModal && (
         <div className="w-screen h-screen fixed bg-opacity-80 bg-black top-0 left-0 p-2 flex justify-center items-center">
           <div className=" bg-white w-[90%] max-w-md p-5 text-sm">

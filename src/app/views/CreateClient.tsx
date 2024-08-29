@@ -38,7 +38,7 @@ export default function CreateClient({clients}:CreateClientProps) {
   // }
 
   return (
-    <div>
+    <div className="p-4">
       <h1 className="font-bold text-slate-700 text-lg">
         1. Seleccionar cliente
       </h1>
