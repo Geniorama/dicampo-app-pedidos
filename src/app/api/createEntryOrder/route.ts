@@ -6,7 +6,7 @@ export async function POST(request: Request) {
   try {
     const environment = await getSpace();
 
-    const { startDate, clientId, items, notes, total, clientName }: Order =
+    const { startDate, clientId, items, notes, total, clientName, sellerEmail }: Order =
       await request.json();
 
     const itemsObject = {
@@ -37,6 +37,10 @@ export async function POST(request: Request) {
 
         total: {
           es: total,
+        },
+
+        sellerEmail: {
+          es: sellerEmail,
         },
       },
     });

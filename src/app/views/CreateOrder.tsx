@@ -9,6 +9,7 @@ import { FieldValues, useForm } from "react-hook-form";
 import { addItem, removeItem } from "@/lib/features/cartSlice";
 import { SubmitHandler } from "react-hook-form";
 import type { Order } from "../types";
+import { useUser } from "@auth0/nextjs-auth0/client";
 
 type CreateOrderProps = {
   products: any;
@@ -19,20 +20,30 @@ export default function CreateOrder({ products }: CreateOrderProps) {
   const [productOnStage, setProductOnStage] = useState<Product | null>(null);
   const [currentTotal, setCurrentTotal] = useState(0);
   const { selectedClient } = useAppSelector((state) => state.client);
+  const [sellerEmail, setSellerEmail] = useState<string | null | undefined>('')
   const { allProducts, itemsCart, totalAmount } = useAppSelector(
     (state) => state.cart
   );
+  
   const router = useRouter();
+  const user = useUser();
+
   const dispatch = useAppDispatch();
 
   const { watch, trigger, handleSubmit, register, reset } = useForm();
 
-  console.log("Selected client", selectedClient);
   useEffect(() => {
     if (!selectedClient || selectedClient.id === "") {
       router.push("/create-client");
     }
   });
+
+  useEffect(() =>{
+    if(user && user.user){
+      const userEmail = user.user.name
+      setSellerEmail(userEmail)
+    }
+  },[user])
 
   const createEntryOrder = async (data: Order) => {
     const response = await fetch("/api/createEntryOrder", {
@@ -170,6 +181,7 @@ export default function CreateOrder({ products }: CreateOrderProps) {
         clientId: selectedClient.id,
         notes: "anywhere",
         total: Number(totalAmount),
+        sellerEmail: sellerEmail
       };
 
       console.log("Order to be sent:", order);

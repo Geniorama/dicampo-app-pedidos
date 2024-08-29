@@ -52,5 +52,6 @@ export type Order = {
     clientName: Client['companyName'],
     startDate: string,
     notes?: string,
-    total: number
+    total: number,
+    sellerEmail?: string | undefined | null
 }
