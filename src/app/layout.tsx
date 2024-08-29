@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Layout from "./layout/Layout";
 import StoreProvider from "./StoreProvider";
+import { UserProvider } from "@auth0/nextjs-auth0/client";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,11 +20,11 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${inter.className} bg-slate-100`}>
-        <StoreProvider>
-          <Layout>
-            {children}
-          </Layout>
-        </StoreProvider>
+        <UserProvider>
+          <StoreProvider>
+            <Layout>{children}</Layout>
+          </StoreProvider>
+        </UserProvider>
       </body>
     </html>
   );

@@ -1,5 +1,7 @@
 import { CreateClient } from "@/app/views"
 import { createClient } from "contentful"
+import { withPageAuthRequired } from "@auth0/nextjs-auth0"
+
 
 const client = createClient({
   accessToken: process.env.CONTENTFUL_ACCESS_TOKEN as string,
@@ -15,7 +17,7 @@ const loadData = async () => {
   return res.items
 }
 
-export default async function CreateClientPage() {
+async function CreateClientPage(){
   const data = await loadData()
 
   return (
@@ -24,3 +26,5 @@ export default async function CreateClientPage() {
     />
   )
 }
+
+export default withPageAuthRequired(CreateClientPage)
