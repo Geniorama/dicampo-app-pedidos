@@ -21,8 +21,8 @@ export default function CreateClient({clients}:CreateClientProps) {
             companyName: companyName,
             companyId: companyId,
             address: address,
-            contactEmail: contact.fields.email,
-            contactPhone: contact.fields.phone
+            contactEmail: contact?.fields.email,
+            contactPhone: contact?.fields.phone
           }
         })
         dispatch(setClients(formattedClients))

@@ -9,7 +9,7 @@ export default function Layout(props: LayoutProps) {
   return (
     <>
       <Header />
-        <main className="w-full max-w-md mx-auto h-[calc(100vh_-_128px)]">
+        <main className="w-full max-w-md mx-auto min-h-[calc(100vh_-_128px)]">
         {props.children}
         </main>
       <Footer />
