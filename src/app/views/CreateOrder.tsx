@@ -3,7 +3,7 @@ import { useAppSelector, useAppDispatch } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { Product, Attribute, ItemCart, Client } from "../types";
-import { setAllProducts } from "@/lib/features/cartSlice";
+import { resetCart, setAllProducts } from "@/lib/features/cartSlice";
 import { convertToPrice } from "../utils/formatters";
 import { FieldValues, useForm } from "react-hook-form";
 import { addItem, removeItem } from "@/lib/features/cartSlice";
@@ -11,6 +11,7 @@ import { SubmitHandler } from "react-hook-form";
 import type { Order } from "../types";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import Loader from "../components/Loader/Loader";
+import { setSelectedClient } from "@/lib/features/clientSlice";
 
 type CreateOrderProps = {
   products: any;
@@ -20,31 +21,31 @@ export default function CreateOrder({ products }: CreateOrderProps) {
   const [openModal, setOpenModal] = useState(false);
   const [productOnStage, setProductOnStage] = useState<Product | null>(null);
   const [currentTotal, setCurrentTotal] = useState(0);
-  const [sellerEmail, setSellerEmail] = useState<string | null | undefined>('');
+  const [sellerEmail, setSellerEmail] = useState<string | null | undefined>("");
   const { allProducts, itemsCart, totalAmount } = useAppSelector(
     (state) => state.cart
   );
-  
+
   const router = useRouter();
-  const {user, isLoading} = useUser();
+  const { user, isLoading } = useUser();
 
   const dispatch = useAppDispatch();
-  const {selectedClient} = useAppSelector(state => state.client)
+  const { selectedClient } = useAppSelector((state) => state.client);
 
   const { watch, trigger, handleSubmit, register, reset } = useForm();
 
   useEffect(() => {
-    if(!selectedClient){
-      router.push('/dashboard/create-client')
+    if (!selectedClient) {
+      router.push("/dashboard/create-client");
     }
-  },[router, selectedClient])
+  }, [router, selectedClient]);
 
-  useEffect(() =>{
-    if(user){
-      const userEmail = user.name
-      setSellerEmail(userEmail)
+  useEffect(() => {
+    if (user) {
+      const userEmail = user.name;
+      setSellerEmail(userEmail);
     }
-  },[user])
+  }, [user]);
 
   const createEntryOrder = async (data: Order) => {
     const response = await fetch("/api/createEntryOrder", {
@@ -125,6 +126,11 @@ export default function CreateOrder({ products }: CreateOrderProps) {
     );
   };
 
+  const handleRemoveOrder = () => {
+    dispatch(resetCart());
+    dispatch(setSelectedClient(null));
+  };
+
   const formatDataForGoogleSheets = (data: Order["items"]) => {
     return data
       .map((item) => {
@@ -144,7 +150,10 @@ export default function CreateOrder({ products }: CreateOrderProps) {
 
   const sendDataToWebHook = (
     data: Order,
-    dataContact: { contactEmail: string | undefined; contactPhone: string | undefined}
+    dataContact: {
+      contactEmail: string | undefined;
+      contactPhone: string | undefined;
+    }
   ) => {
     const webhookUrl =
       "https://hook.us1.make.com/pul9wk1svgffc1682vihb0eojaggewu8";
@@ -181,7 +190,7 @@ export default function CreateOrder({ products }: CreateOrderProps) {
         clientId: selectedClient.id,
         notes: "anywhere",
         total: Number(totalAmount),
-        sellerEmail: sellerEmail
+        sellerEmail: sellerEmail,
       };
 
       try {
@@ -198,7 +207,7 @@ export default function CreateOrder({ products }: CreateOrderProps) {
 
       sendDataToWebHook(order, contact);
 
-      router.push('/thank-you')
+      router.push("/thank-you");
     }
   };
 
@@ -432,6 +441,13 @@ export default function CreateOrder({ products }: CreateOrderProps) {
             </button>
           </>
         ))}
+
+      <button
+        onClick={handleRemoveOrder}
+        className="underline text-center w-full my-3 text-sm text-slate-700"
+      >
+        Cancelar pedido
+      </button>
     </div>
   );
 }
