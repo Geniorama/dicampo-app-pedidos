@@ -26,7 +26,7 @@ function ThankYou() {
     router.push('/dashboard/create-client')
   };
   return (
-    <div className="text-center h-full bg-slate-800 text-white flex items-center flex-col justify-center gap-6 p-4">
+    <div className="text-center h-[calc(100vh_-_120px)] bg-slate-800 text-white flex items-center flex-col justify-center gap-6 p-4">
       <h1 className="text-3xl font-bold leading-8 text-slate-200">Tu pedido se registró exitosamente</h1>
       <button className=" bg-orange-600 p-2 w-full" onClick={handleCreateNewOrder}>Hacer nuevo pedido</button>
       <a className="text-sm underline" onClick={(e) => handleLogout(e)} href={"#"}>Cerrar sesión</a>
