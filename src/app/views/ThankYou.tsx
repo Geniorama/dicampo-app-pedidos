@@ -15,26 +15,15 @@ function ThankYou() {
 
   const handleLogout = (e: any) => {
     e.preventDefault();
-    localStorage.removeItem("selectedClient");
     dispatch(resetCart());
     dispatch(setSelectedClient(null));
     window.location.href = "/api/auth/logout";
   };
 
-  useEffect(() => {
-    if(localStorage.getItem('selectedClient')){
-      localStorage.removeItem('selectedClient')
-    }
-
-    if(!itemsCart || itemsCart.length < 1){
-      router.push('/')
-    }
-  }, [itemsCart, router])
-
   const handleCreateNewOrder = () => {
     dispatch(setSelectedClient(null))
     dispatch(resetCart())
-    router.push('/create-order')
+    router.push('/dashboard/create-client')
   };
   return (
     <div className="text-center h-full bg-slate-800 text-white flex items-center flex-col justify-center gap-6 p-4">

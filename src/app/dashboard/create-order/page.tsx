@@ -1,4 +1,4 @@
-import { CreateOrder } from "../views";
+import { CreateOrder } from "../../views";
 import { createClient } from "contentful";
 import { withPageAuthRequired } from "@auth0/nextjs-auth0";
 

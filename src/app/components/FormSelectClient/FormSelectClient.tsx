@@ -10,7 +10,6 @@ import Swal from "sweetalert2";
 
 export default function FormSelectClient() {
   const [isNew, setIsNew] = useState(false);
-  const [clientSelected, setClientSelected] = useState("");
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [idEntryClient, setIdEntryClient] = useState<string | null>(null);
@@ -27,12 +26,6 @@ export default function FormSelectClient() {
     trigger,
     formState: { errors },
   } = useForm<Client>();
-
-  useEffect(() => {
-    if (selectedClient) {
-      router.push("/create-order");
-    }
-  }, [selectedClient, router]);
 
   const createEntryClient = async (data: Client) => {
     const response = await fetch("/api/createEntryClient", {
@@ -95,7 +88,8 @@ export default function FormSelectClient() {
         if (response.id) {
           const res = await includeContactInClient(idEntryClient, response.id);
           if (res) {
-            console.log("Redirecting to /create-order");
+            console.log("Redirecting to /dashboard/create-order");
+            router.push('/dashboard/create-order')
           }
         }
       } catch (error) {
@@ -113,7 +107,12 @@ export default function FormSelectClient() {
     if (value === "new") {
       setIsNew(true);
     } else {
-      setClientSelected(value);
+      // setClientSelected(value);
+      const updatedClientSelected = clients.find(client => client.id === value)
+
+      if(updatedClientSelected){
+        dispatch(setSelectedClient(updatedClientSelected))
+      }
       setIsNew(false);
     }
   };
@@ -160,19 +159,9 @@ export default function FormSelectClient() {
     setCurrentStep((prevStep) => prevStep - 1);
   };
 
-  console.log(clients)
-
-  const handleUpdateSelectedClient = () => {
-    const newClientSelected = clients.find(
-      (client) => client.id === clientSelected
-    );
-    if (newClientSelected) {
-      dispatch(
-        setSelectedClient(newClientSelected)
-      );
-      localStorage.setItem('selectedClient', JSON.stringify(newClientSelected))
-    }
-  };
+  const handleInitOrder = () =>{
+    router.push('/dashboard/create-order')
+  }
 
   return (
     <>
@@ -186,7 +175,7 @@ export default function FormSelectClient() {
         <select
           onChange={handleChange}
           className="w-full h-10 px-2 outline-none disabled:opacity-50"
-          defaultValue={selectedClient ? selectedClient.id : ""}
+          value={selectedClient ? selectedClient.id : ""}
           disabled={currentStep !== 1}
         >
           <option disabled value="">
@@ -200,9 +189,9 @@ export default function FormSelectClient() {
           <option value="new">Nuevo Cliente</option>
         </select>
 
-        {clientSelected !== "" && !isNew && (
+        {selectedClient && !isNew && (
           <button
-            onClick={handleUpdateSelectedClient}
+            onClick={handleInitOrder}
             className=" bg-orange-600 text-white w-full p-2 mt-2"
           >
             Ir a pedidos

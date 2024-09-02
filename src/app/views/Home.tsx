@@ -14,7 +14,7 @@ export default function Home() {
     if (!user) {
       router.push("/api/auth/login");
     } else {
-      router.push("/create-client");
+      router.push("/dashboard/create-client");
     }
   }, [user, isLoading, router]);
 

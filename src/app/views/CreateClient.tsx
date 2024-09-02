@@ -1,9 +1,9 @@
 "use client";
 import { FormSelectClient } from "../components/FormSelectClient";
-import { useAppDispatch } from "@/lib/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import type { Client } from "../types";
 import { useEffect } from "react";
-import { setClients } from "@/lib/features/clientSlice";
+import { setClients, setSelectedClient } from "@/lib/features/clientSlice";
 
 type CreateClientProps = {
   clients: any
@@ -31,12 +31,9 @@ export default function CreateClient({clients}:CreateClientProps) {
     if(clients){
       updateClients()
     }
+
   },[clients, dispatch]);
-
-  // if(!stateClients || stateClients.length <=0){
-  //   return <h1>Loading</h1>
-  // }
-
+  
   return (
     <div className="p-4">
       <h1 className="font-bold text-slate-700 text-lg">

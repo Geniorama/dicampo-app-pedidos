@@ -44,12 +44,19 @@ const cartSlice = createSlice({
       );
     },
 
-    removeItem(state, action: PayloadAction<{ id: string; attributesSelected: ItemCart['attributesSelected'] }>) {
+    removeItem(
+      state,
+      action: PayloadAction<{
+        id: string;
+        attributesSelected: ItemCart["attributesSelected"];
+      }>
+    ) {
       const { id, attributesSelected } = action.payload;
       const index = state.itemsCart.findIndex(
         (item) =>
           item.id === id &&
-          JSON.stringify(item.attributesSelected) === JSON.stringify(attributesSelected)
+          JSON.stringify(item.attributesSelected) ===
+            JSON.stringify(attributesSelected)
       );
 
       if (index !== -1) {
@@ -63,10 +70,11 @@ const cartSlice = createSlice({
     },
 
     resetCart: (state) => {
-        state = initialState
-    }
+      return state = initialState
+    },
   },
 });
 
-export const { addItem, removeItem, setAllProducts, resetCart } = cartSlice.actions;
+export const { addItem, removeItem, setAllProducts, resetCart } =
+  cartSlice.actions;
 export default cartSlice.reducer;

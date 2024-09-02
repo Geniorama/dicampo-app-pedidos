@@ -10,6 +10,7 @@ import { addItem, removeItem } from "@/lib/features/cartSlice";
 import { SubmitHandler } from "react-hook-form";
 import type { Order } from "../types";
 import { useUser } from "@auth0/nextjs-auth0/client";
+import Loader from "../components/Loader/Loader";
 
 type CreateOrderProps = {
   products: any;
@@ -19,31 +20,28 @@ export default function CreateOrder({ products }: CreateOrderProps) {
   const [openModal, setOpenModal] = useState(false);
   const [productOnStage, setProductOnStage] = useState<Product | null>(null);
   const [currentTotal, setCurrentTotal] = useState(0);
-  const [sellerEmail, setSellerEmail] = useState<string | null | undefined>('')
+  const [sellerEmail, setSellerEmail] = useState<string | null | undefined>('');
   const { allProducts, itemsCart, totalAmount } = useAppSelector(
     (state) => state.cart
   );
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   
   const router = useRouter();
-  const user = useUser();
+  const {user, isLoading} = useUser();
 
   const dispatch = useAppDispatch();
+  const {selectedClient} = useAppSelector(state => state.client)
 
   const { watch, trigger, handleSubmit, register, reset } = useForm();
 
   useEffect(() => {
-    const selectedClientStorage = localStorage.getItem('selectedClient')
-    if(selectedClientStorage){
-      setSelectedClient(JSON.parse(selectedClientStorage))
-    } else {
-      router.push("/create-client")
+    if(!selectedClient){
+      router.push('/dashboard/create-client')
     }
-  }, [router])
+  },[router, selectedClient])
 
   useEffect(() =>{
-    if(user && user.user){
-      const userEmail = user.user.name
+    if(user){
+      const userEmail = user.name
       setSellerEmail(userEmail)
     }
   },[user])
