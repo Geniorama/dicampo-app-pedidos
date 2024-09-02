@@ -2,7 +2,7 @@
 
 import type { Client, Contact } from "@/app/types";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { setSelectedClient } from "@/lib/features/clientSlice";
 import { useRouter } from "next/navigation";
@@ -96,7 +96,6 @@ export default function FormSelectClient() {
           const res = await includeContactInClient(idEntryClient, response.id);
           if (res) {
             console.log("Redirecting to /create-order");
-            window.location.reload();
           }
         }
       } catch (error) {
@@ -167,11 +166,11 @@ export default function FormSelectClient() {
     const newClientSelected = clients.find(
       (client) => client.id === clientSelected
     );
-
     if (newClientSelected) {
       dispatch(
         setSelectedClient(newClientSelected)
       );
+      localStorage.setItem('selectedClient', JSON.stringify(newClientSelected))
     }
   };
 

@@ -7,13 +7,13 @@ import cartSlice from "./features/cartSlice";
 // Configuración de persistencia para el cliente
 const persistClientConfig = {
   key: 'client', // Clave única para el estado del cliente
-  storage,
+  storage
 };
 
 // Configuración de persistencia para el carrito
 const persistCartConfig = {
   key: 'cart', // Clave única para el estado del carrito
-  storage,
+  storage
 };
 
 // Reducers persistidos
@@ -32,7 +32,8 @@ export const makeStore = () => {
         ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
         ignoredPaths: ["register", "rehydrate"],
       },
-    })
+    }),
+    devTools: process.env.NODE_ENV !== 'production',
   });
 };
 

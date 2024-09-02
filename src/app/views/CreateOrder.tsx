@@ -2,7 +2,7 @@
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import type { Product, Attribute, ItemCart } from "../types";
+import type { Product, Attribute, ItemCart, Client } from "../types";
 import { setAllProducts } from "@/lib/features/cartSlice";
 import { convertToPrice } from "../utils/formatters";
 import { FieldValues, useForm } from "react-hook-form";
@@ -19,11 +19,11 @@ export default function CreateOrder({ products }: CreateOrderProps) {
   const [openModal, setOpenModal] = useState(false);
   const [productOnStage, setProductOnStage] = useState<Product | null>(null);
   const [currentTotal, setCurrentTotal] = useState(0);
-  const { selectedClient } = useAppSelector((state) => state.client);
   const [sellerEmail, setSellerEmail] = useState<string | null | undefined>('')
   const { allProducts, itemsCart, totalAmount } = useAppSelector(
     (state) => state.cart
   );
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   
   const router = useRouter();
   const user = useUser();
@@ -33,10 +33,13 @@ export default function CreateOrder({ products }: CreateOrderProps) {
   const { watch, trigger, handleSubmit, register, reset } = useForm();
 
   useEffect(() => {
-    if (!selectedClient || selectedClient.id === "") {
-      router.push("/create-client");
+    const selectedClientStorage = localStorage.getItem('selectedClient')
+    if(selectedClientStorage){
+      setSelectedClient(JSON.parse(selectedClientStorage))
+    } else {
+      router.push("/create-client")
     }
-  });
+  }, [router])
 
   useEffect(() =>{
     if(user && user.user){
@@ -82,7 +85,6 @@ export default function CreateOrder({ products }: CreateOrderProps) {
 
   useEffect(() => {
     if (products) {
-      console.log(products);
       const updatedProducts = transformDataProducts(products);
       dispatch(setAllProducts(updatedProducts));
     }
