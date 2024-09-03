@@ -10,8 +10,8 @@ import { addItem, removeItem } from "@/lib/features/cartSlice";
 import { SubmitHandler } from "react-hook-form";
 import type { Order } from "../types";
 import { useUser } from "@auth0/nextjs-auth0/client";
-import Loader from "../components/Loader/Loader";
 import { setSelectedClient } from "@/lib/features/clientSlice";
+import Swal from "sweetalert2";
 
 type CreateOrderProps = {
   products: any;
@@ -181,33 +181,44 @@ export default function CreateOrder({ products }: CreateOrderProps) {
   };
 
   const handleCreateOrder = async () => {
-    const formattedDate = new Date().toISOString();
-    if (selectedClient?.id && itemsCart) {
-      const order: Order = {
-        clientName: selectedClient.companyName,
-        items: itemsCart,
-        startDate: `${formattedDate}`,
-        clientId: selectedClient.id,
-        notes: "anywhere",
-        total: Number(totalAmount),
-        sellerEmail: sellerEmail,
-      };
+    const result = await Swal.fire({
+      title: "Confirmar pedido",
+      html: `¿Estás segur@ de realizar este pedido para <br /> <b> ${selectedClient?.companyName}</b>?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: "Si, continuar",
+      cancelButtonText: "Cancelar"
+    });
 
-      try {
-        const res = await createEntryOrder(order);
-        console.log(res);
-      } catch (error) {
-        console.log(error);
+    if (result.isConfirmed) {
+      const formattedDate = new Date().toISOString();
+      if (selectedClient?.id && itemsCart) {
+        const order: Order = {
+          clientName: selectedClient.companyName,
+          items: itemsCart,
+          startDate: `${formattedDate}`,
+          clientId: selectedClient.id,
+          notes: "anywhere",
+          total: Number(totalAmount),
+          sellerEmail: sellerEmail,
+        };
+
+        try {
+          const res = await createEntryOrder(order);
+          console.log(res);
+        } catch (error) {
+          console.log(error);
+        }
+
+        const contact = {
+          contactEmail: selectedClient.contactEmail,
+          contactPhone: selectedClient.contactPhone,
+        };
+
+        sendDataToWebHook(order, contact);
+
+        router.push("/thank-you");
       }
-
-      const contact = {
-        contactEmail: selectedClient.contactEmail,
-        contactPhone: selectedClient.contactPhone,
-      };
-
-      sendDataToWebHook(order, contact);
-
-      router.push("/thank-you");
     }
   };
 

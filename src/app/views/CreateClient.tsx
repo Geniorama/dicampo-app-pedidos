@@ -1,9 +1,9 @@
 "use client";
 import { FormSelectClient } from "../components/FormSelectClient";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { useAppDispatch } from "@/lib/hooks";
 import type { Client } from "../types";
 import { useEffect } from "react";
-import { setClients, setSelectedClient } from "@/lib/features/clientSlice";
+import { setClients } from "@/lib/features/clientSlice";
 
 type CreateClientProps = {
   clients: any

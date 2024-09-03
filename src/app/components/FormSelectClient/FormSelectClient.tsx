@@ -2,7 +2,7 @@
 
 import type { Client, Contact } from "@/app/types";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { setSelectedClient } from "@/lib/features/clientSlice";
 import { useRouter } from "next/navigation";
