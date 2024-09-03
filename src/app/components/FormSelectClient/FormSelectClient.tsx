@@ -83,13 +83,17 @@ export default function FormSelectClient() {
 
   const onSubmit: SubmitHandler<Client> = async (data) => {
     if (data.contact && idEntryClient) {
+      const transformContactData = {
+        ...data.contact,
+        phone: "+57" + data.contact.phone
+      }
       try {
-        const response = await createEntryContact(data.contact);
+        const response = await createEntryContact(transformContactData);
         if (response.id) {
           const res = await includeContactInClient(idEntryClient, response.id);
           if (res) {
-            console.log("Redirecting to /dashboard/create-order");
-            router.push('/dashboard/create-order')
+            dispatch(setSelectedClient(null))
+            window.location.href="/"
           }
         }
       } catch (error) {
@@ -175,7 +179,7 @@ export default function FormSelectClient() {
         <select
           onChange={handleChange}
           className="w-full h-10 px-2 outline-none disabled:opacity-50"
-          value={selectedClient ? selectedClient.id : ""}
+          value={isNew ? 'new' : selectedClient ? selectedClient.id : ''}
           disabled={currentStep !== 1}
         >
           <option disabled value="">
@@ -204,6 +208,9 @@ export default function FormSelectClient() {
           {isNew && (
             <div>
               <hr className="mt-5 mb-3" />
+              <span className=" block h-1 w-full bg-slate-200 mb-4 relative">
+                <span className={`h-full bg-green-500 block transition ${currentStep === 1 ? 'w-1/2' : 'w-full'}`}></span>
+              </span>
               <h3 className=" text-center mb-2 block font-bold text-slate-800">
                 Crear nuevo cliente
               </h3>
@@ -211,8 +218,8 @@ export default function FormSelectClient() {
               {/* STEP 1 */}
               {currentStep === 1 && (
                 <fieldset className="mt-5 space-y-4">
-                  <legend className="text-xs text-center">
-                    - Información de la empresa -
+                  <legend className="text-xs text-center font-bold text-green-600">
+                    - 1. Información de la empresa -
                   </legend>
                   <div>
                     <label
@@ -253,6 +260,7 @@ export default function FormSelectClient() {
                       ID (NIT, RUIP, CC) *
                     </label>
                     <input
+                      placeholder="1234567890"
                       type="text"
                       {...register("companyId", { required: true })}
                       id="company-id"
@@ -273,8 +281,8 @@ export default function FormSelectClient() {
 
               {currentStep === 2 && (
                 <fieldset className="mt-5 space-y-4">
-                  <legend className="text-xs text-center">
-                    - Información de contacto -
+                  <legend className="text-xs text-center text-xs text-center font-bold text-green-600">
+                    - 2. Información de contacto -
                   </legend>
                   <div>
                     <label
@@ -368,14 +376,19 @@ export default function FormSelectClient() {
                     >
                       Teléfono *
                     </label>
-                    <input
-                      required
-                      placeholder="+573001234567"
-                      type="tel"
-                      {...register("contact.phone", { required: true })}
-                      id="phone"
-                      className="h-[40px] w-full px-2 focus:ring-1 focus:ring-[#ee6b28] outline-none"
-                    />
+                    <div className="relative">
+                      <input
+                        required
+                        placeholder="3001234567"
+                        type="number"
+                        {...register("contact.phone", { required: true })}
+                        id="phone"
+                        className="h-[40px] w-full px-2 focus:ring-1 focus:ring-[#ee6b28] outline-none pl-12"
+                      />
+                      <span className="absolute top-0 left-0 h-full w-50px flex justify-center items-center p-1 text-slate-600">
+                        +57 |
+                      </span>
+                    </div>
                   </div>
 
                   <div className="flex justify-between">
@@ -390,7 +403,7 @@ export default function FormSelectClient() {
                       type="submit"
                       className=" bg-orange-600 text-white w-full p-2 mt-2"
                     >
-                      Crear Cliente
+                      {currentStep !== 2 ? 'Crear empresa' : 'Crear contacto'}
                     </button>
                   </div>
                 </fieldset>
