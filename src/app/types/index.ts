@@ -29,12 +29,13 @@ export type Product = {
     name: string,
     description?: string,
     price: number,
-    attributes: Attribute[]
+    attributes: Attribute[],
 }
 
 export type ItemCart = Omit<Product, 'attributes'| 'description'> & {
     quantity: number,
     subtotal: number,
+    additionalPrice?: number,
     attributesSelected?: {
         id: Attribute['id'],
         name: Attribute['name'],

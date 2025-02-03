@@ -12,6 +12,7 @@ import type { Order } from "../types";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { setSelectedClient } from "@/lib/features/clientSlice";
 import Swal from "sweetalert2";
+import flavors from "../utils/flavors";
 
 type CreateOrderProps = {
   products: any;
@@ -20,11 +21,12 @@ type CreateOrderProps = {
 export default function CreateOrder({ products }: CreateOrderProps) {
   const [openModal, setOpenModal] = useState(false);
   const [productOnStage, setProductOnStage] = useState<Product | null>(null);
-  const [currentTotal, setCurrentTotal] = useState(0);
+  const [currentTotal, setCurrentTotal] = useState<number | null>(null);
   const [sellerEmail, setSellerEmail] = useState<string | null | undefined>("");
   const { allProducts, itemsCart, totalAmount } = useAppSelector(
     (state) => state.cart
   );
+  const [error, setError] = useState<string | null>(null)
 
   const router = useRouter();
   const { user, isLoading } = useUser();
@@ -101,12 +103,36 @@ export default function CreateOrder({ products }: CreateOrderProps) {
 
   useEffect(() => {
     const productQuantity = watch("quantity");
-    if (productQuantity && productOnStage) {
-      const updateSubtotal = productOnStage.price * productQuantity;
+    const selectedFlavor = watch("attributes.1IJYSQCxflymQWFvHEK2um.value")
 
-      setCurrentTotal(updateSubtotal);
+    if (productQuantity && productOnStage) {
+      
+      const selectedFlavorData = flavors.find(flavor => flavor.attributeValue === selectedFlavor);
+      const isKilo = productOnStage.name.includes('kilo') ? true : false;
+      let additionalPrice: number | null = 0
+
+      if(!selectedFlavorData){
+        return
+      }
+
+      if(isKilo){
+        additionalPrice = selectedFlavorData.addPriceByProduct.kilo
+      } else {
+        additionalPrice = selectedFlavorData.addPriceByProduct.pound
+      }
+
+      if(additionalPrice === null){
+        setError(`El producto seleccionado no está disponible en ${isKilo ? 'kilo' : 'libra'}`)
+        setCurrentTotal(null)
+      } else {
+        setError(null)
+        const updateSubtotal = (productOnStage.price * productQuantity) + (additionalPrice * productQuantity);
+        setCurrentTotal(updateSubtotal);
+      }
+      
+      
     }
-  }, [watch("quantity"), productOnStage]);
+  }, [watch("quantity"), watch("attributes.1IJYSQCxflymQWFvHEK2um.value") , watch("productId"), productOnStage, setError]);
 
   if (!products || products.lenght < 1) {
     return <h1>Loading</h1>;
@@ -143,7 +169,7 @@ export default function CreateOrder({ products }: CreateOrderProps) {
           )
           .join("\n");
 
-        return `Producto: ${item.name}\nPrecio: ${item.price}\nCantidad: ${item.quantity}\nSubtotal: ${item.subtotal}\n${attributes}`;
+        return `Producto: ${item.name}\nPrecio: ${item.price}\nValor adicional por sabor: ${item.additionalPrice}\nCantidad: ${item.quantity}\nSubtotal: ${item.subtotal}\n${attributes}`;
       })
       .join("\n\n");
   };
@@ -234,32 +260,43 @@ export default function CreateOrder({ products }: CreateOrderProps) {
           },
         ],
       }));
+  
+      const selectedFlavor = data.attributes["1IJYSQCxflymQWFvHEK2um"].value;
+      const selectedFlavorData = flavors.find(
+        (flavor) => flavor.attributeValue === selectedFlavor
+      );
+  
+      let additionalPrice:number | null = 0;
+      if (selectedFlavorData) {
+        const isKilo = productOnStage.name.includes("kilo");
+        additionalPrice = isKilo ? selectedFlavorData.addPriceByProduct.kilo : selectedFlavorData.addPriceByProduct.pound;
+      }
+      
+      if(additionalPrice === null){
+        return
+      }
 
+      const subtotal = (productOnStage.price + additionalPrice) * data.quantity;
+  
       const productToAdd: ItemCart = {
-        // ...productOnStage,
         name: productOnStage.name,
         price: productOnStage.price,
+        additionalPrice,
         id: productOnStage.id,
         attributesSelected: selectedAttributes,
         quantity: data.quantity,
-        subtotal: productOnStage.price * data.quantity,
+        subtotal,
       };
-
+  
       // Despacha la acción para agregar el producto al carrito
       dispatch(addItem(productToAdd));
-
-      console.log("Producto agregado", productToAdd);
-      console.log("Cart products", itemsCart);
-
+  
       reset();
-
-      setCurrentTotal(0);
-
-      // Cierra el modal
+      setCurrentTotal(null);
       handleCloseModal();
-      setProductOnStage(null);
     }
   };
+  
 
   return (
     <div className="p-4">
@@ -326,9 +363,15 @@ export default function CreateOrder({ products }: CreateOrderProps) {
                 </p>
               )}
 
-              <span className="font-bold text-lg mt-2 block text-slate-700">
-                Subtotal: {convertToPrice(currentTotal)}
-              </span>
+              {error && (
+                <span className="text-red-600 font-bold">{error}</span>
+              )}
+
+              {currentTotal && currentTotal !== null && (
+                <span className="font-bold text-lg mt-2 block text-slate-700">
+                  Subtotal: {convertToPrice(currentTotal)}
+                </span>
+              )}
 
               <div className=" flex gap-1 mt-3">
                 <button
@@ -339,7 +382,8 @@ export default function CreateOrder({ products }: CreateOrderProps) {
                 </button>
                 <button
                   type="submit"
-                  className=" block w-1/2 p-2 bg-orange-600 text-white font-semibold"
+                  disabled={!currentTotal}
+                  className=" block w-1/2 p-2 bg-orange-600 text-white font-semibold disabled:opacity-45"
                 >
                   Agregar al pedido
                 </button>
@@ -416,6 +460,7 @@ export default function CreateOrder({ products }: CreateOrderProps) {
         (itemsCart.length < 1 && (
           <>
             <h3 className="text-sm font-semibold mt-5">Tabla de productos</h3>
+            <p className="text-sm mt-2 text-red-600">El precio puede variar dependiendo del sabor seleccionado</p>
             <p className="text-sm mt-2 text-slate-700">
               Haz click en <b>{`"Iniciar el pedido"`}</b> para ver los{" "}
               <b>sabores</b>
@@ -427,7 +472,7 @@ export default function CreateOrder({ products }: CreateOrderProps) {
                     Nombre
                   </th>
                   <th className="border-b border-slate-200 p-2 text-sm bg-slate-600 text-white">
-                    Valor unit
+                    Precio base
                   </th>
                 </tr>
               </thead>
